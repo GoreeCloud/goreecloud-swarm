@@ -16,6 +16,9 @@ api:
     - /api/v1/health
     - /api/v1/capabilities
     - /api/v1/transfers
+    - /api/v1/transfers/{id}/pause
+    - /api/v1/transfers/{id}/resume
+    - /api/v1/transfers/{id}
 platform_systems:
   manager:
     result: applicable-blocked
@@ -125,7 +128,7 @@ conformance:
     - SECURITY.md
     - PRIVACY POLICY.md
   blockers:
-    - The versioned engine-sidecar client exists, but no production BitTorrent engine sidecar or peer transfer is implemented.
+    - No BitTorrent transfer engine is connected.
     - Torrent metainfo ingestion, peer transfer, persistence, recovery, and network policy enforcement are not implemented.
     - Remote authentication and authorization are not implemented.
     - GoreeCloud Manager, Privacy Shield, Wardveil Security, Everkeep, Glaze UI, Mesh, Identity, and Sync runtime integrations are incomplete.
