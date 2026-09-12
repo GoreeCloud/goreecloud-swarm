@@ -7,10 +7,12 @@ Swarm is development/pre-alpha software and is not production-ready.
 ## Security controls implemented in the foundation
 
 - The management service binds to loopback by default and refuses non-loopback addresses until authenticated remote management is implemented.
-- HTTP request bodies for transfer creation are bounded.
-- Unknown JSON request fields are rejected.
+- HTTP request bodies are bounded, including a 16 MiB development metainfo-inspection ceiling.
+- Unknown JSON transfer-request fields are rejected.
 - Responses include baseline `nosniff`, no-referrer, and no-store headers.
 - Magnet URIs and tracker schemes are validated before they reach an engine.
+- The native bencode decoder bounds total input size, nesting depth, byte-string length, and container entries; duplicate dictionary keys and non-canonical integers are rejected.
+- `.torrent` inspection validates essential v1/v2 structure before exposing metadata and computes hashes from the original raw `info` bytes.
 - Storage path helpers reject absolute paths and parent traversal outside the authorized download root.
 - A failed engine operation is not recorded as an accepted transfer.
 - The current engine placeholder performs no network transfer and truthfully reports itself unavailable.
@@ -24,7 +26,7 @@ The current foundation does not provide:
 - session/device management;
 - rate limiting or brute-force protection for remote access;
 - BitTorrent peer/tracker protocol processing;
-- torrent metainfo/bencode parsing;
+- metainfo fuzzing and broad real-world compatibility corpus validation;
 - engine process sandboxing;
 - persistent-state encryption or database hardening;
 - signed release/update verification;
