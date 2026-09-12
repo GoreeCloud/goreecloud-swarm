@@ -30,7 +30,14 @@ func main() {
 		os.Exit(2)
 	}
 
-	transferEngine := engine.Unavailable{}
+	transferEngine, err := engine.NewConfigured(engine.Config{
+		Kind:        os.Getenv("SWARM_ENGINE"),
+		DownloadDir: os.Getenv("SWARM_DOWNLOAD_DIR"),
+	})
+	if err != nil {
+		logger.Error("Swarm engine configuration rejected", "error", err)
+		os.Exit(2)
+	}
 	manager := core.NewManager(transferEngine)
 	server := api.NewServer(manager, logger)
 
@@ -46,8 +53,9 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
+	caps := transferEngine.Capabilities(context.Background())
 	go func() {
-		logger.Info("Swarm service starting", "listen_addr", addr, "engine", "unavailable", "status", "development")
+		logger.Info("Swarm service starting", "listen_addr", addr, "engine", caps.Name, "engine_ready", caps.Ready, "status", "development")
 		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			logger.Error("Swarm service failed", "error", err)
 			stop()

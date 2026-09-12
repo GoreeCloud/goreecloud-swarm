@@ -37,3 +37,21 @@ jobs:
 
       - name: Build service
         run: go build ./cmd/swarmd
+
+  engine-anacrolix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+          check-latest: true
+
+      - name: Compile and test Anacrolix engine adapter
+        run: go test -mod=mod -tags anacrolix_engine ./internal/engine ./cmd/swarmd
+
+      - name: Build service with Anacrolix engine adapter
+        run: go build -mod=mod -tags anacrolix_engine ./cmd/swarmd
