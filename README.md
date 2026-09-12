@@ -16,6 +16,7 @@ Implemented in this foundation:
 - Versioned isolated engine-sidecar client and handshake protocol.
 - Local-only HTTP API default (`127.0.0.1`).
 - `/api/v1/health` and `/api/v1/capabilities` endpoints.
+- Transfer add/list/pause/resume/remove API lifecycle.
 - Truthful degraded health while no transfer engine is attached.
 - Magnet URI parsing and validation.
 - Download-path sanitization primitives.
