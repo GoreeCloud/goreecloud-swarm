@@ -11,6 +11,9 @@
 | Health and engine capability reporting | Implemented | `/api/v1/health`, `/api/v1/capabilities` |
 | Replaceable transfer-engine boundary | Implemented | `internal/engine` |
 | Magnet URI parser | Implemented foundation | `internal/protocol` |
+| Bounded bencode decoder | Implemented foundation | `internal/protocol/bencode` |
+| v1/v2/hybrid `.torrent` metainfo inspection | Implemented foundation | `internal/protocol/torrent.go` |
+| Metainfo inspection API | Implemented foundation | `POST /api/v1/metainfo/inspect` |
 | Storage path traversal protection | Implemented foundation | `internal/storage` |
 | Transfer lifecycle domain model | Implemented foundation | `internal/core` |
 | Automated format/vet/test/build validation | Implemented | `.github/workflows/ci.yml` |
@@ -20,7 +23,7 @@
 The following remain planned and must not be represented as available:
 
 - actual peer-to-peer transfer;
-- `.torrent` metainfo/bencode parsing;
+- using `.torrent` metainfo to start transfers through a real engine;
 - tracker communication;
 - DHT, PEX, Local Peer Discovery, and web seeds;
 - v1/v2/hybrid torrent operation through a real engine;
