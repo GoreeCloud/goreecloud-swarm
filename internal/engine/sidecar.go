@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"sync"
@@ -42,6 +43,7 @@ type sidecarError struct {
 type helloParams struct {
 	ProtocolVersion int    `json:"protocol_version"`
 	Client          string `json:"client"`
+	DownloadRoot    string `json:"download_root"`
 }
 
 type helloResult struct {
@@ -59,9 +61,13 @@ type Sidecar struct {
 	closed       bool
 }
 
-func StartSidecar(ctx context.Context, executable string, stderr io.Writer) (*Sidecar, error) {
+func StartSidecar(ctx context.Context, executable, downloadRoot string, stderr io.Writer) (*Sidecar, error) {
 	if executable == "" || !filepath.IsAbs(executable) {
 		return nil, fmt.Errorf("%w: engine executable must be an absolute path", ErrProtocol)
+	}
+	resolvedRoot, err := resolveDownloadRoot(downloadRoot)
+	if err != nil {
+		return nil, err
 	}
 
 	cmd := exec.Command(executable)
@@ -88,7 +94,7 @@ func StartSidecar(ctx context.Context, executable string, stderr io.Writer) (*Si
 	handshakeCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 	var hello helloResult
-	if err := s.call(handshakeCtx, "hello", helloParams{ProtocolVersion: SidecarProtocolVersion, Client: "swarmd"}, &hello); err != nil {
+	if err := s.call(handshakeCtx, "hello", helloParams{ProtocolVersion: SidecarProtocolVersion, Client: "swarmd", DownloadRoot: resolvedRoot}, &hello); err != nil {
 		_ = s.killAndWait()
 		return nil, fmt.Errorf("engine handshake: %w", err)
 	}
@@ -223,4 +229,22 @@ func (s *Sidecar) killAndWait() error {
 		_ = s.cmd.Process.Kill()
 	}
 	return s.cmd.Wait()
+}
+
+func resolveDownloadRoot(root string) (string, error) {
+	if root == "" || !filepath.IsAbs(root) {
+		return "", fmt.Errorf("%w: download root must be an absolute path", ErrProtocol)
+	}
+	resolved, err := filepath.EvalSymlinks(root)
+	if err != nil {
+		return "", fmt.Errorf("%w: resolve download root: %v", ErrProtocol, err)
+	}
+	info, err := os.Stat(resolved)
+	if err != nil {
+		return "", fmt.Errorf("%w: stat download root: %v", ErrProtocol, err)
+	}
+	if !info.IsDir() {
+		return "", fmt.Errorf("%w: download root must be a directory", ErrProtocol)
+	}
+	return resolved, nil
 }
