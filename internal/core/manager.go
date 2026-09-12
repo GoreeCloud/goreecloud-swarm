@@ -70,6 +70,49 @@ func (m *Manager) AddMagnet(ctx context.Context, raw string) (Transfer, error) {
 	return transfer, nil
 }
 
+func (m *Manager) AddTorrent(ctx context.Context, data []byte) (Transfer, error) {
+	caps := m.engine.Capabilities(ctx)
+	if !caps.Ready {
+		return Transfer{}, engine.ErrUnavailable
+	}
+
+	meta, err := protocol.ParseTorrent(data)
+	if err != nil {
+		return Transfer{}, err
+	}
+	var required engine.Capability
+	switch meta.Version {
+	case protocol.TorrentV1:
+		required = engine.CapabilityTorrentV1
+	case protocol.TorrentV2:
+		required = engine.CapabilityTorrentV2
+	case protocol.TorrentHybrid:
+		required = engine.CapabilityHybrid
+	default:
+		return Transfer{}, engine.ErrUnsupported
+	}
+	if !caps.Supports(required) {
+		return Transfer{}, engine.ErrUnsupported
+	}
+
+	id, err := randomID()
+	if err != nil {
+		return Transfer{}, err
+	}
+	now := time.Now().UTC()
+	transfer := Transfer{ID: id, Name: meta.Name, State: StatePending, AddedAt: now, UpdatedAt: now}
+	if err := m.engine.AddTorrent(ctx, engine.AddTorrentRequest{ID: id, Metainfo: data}); err != nil {
+		transfer.State = StateError
+		transfer.LastError = err.Error()
+		transfer.UpdatedAt = time.Now().UTC()
+		return transfer, err
+	}
+	m.mu.Lock()
+	m.transfers[id] = transfer
+	m.mu.Unlock()
+	return transfer, nil
+}
+
 func (m *Manager) Get(id string) (Transfer, error) {
 	m.mu.RLock()
 	transfer, ok := m.transfers[id]
