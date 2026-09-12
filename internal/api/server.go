@@ -6,6 +6,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -56,6 +57,9 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /api/v1/transfers", s.listTransfers)
 	s.mux.HandleFunc("POST /api/v1/metainfo/inspect", s.inspectMetainfo)
 	s.mux.HandleFunc("POST /api/v1/transfers", s.addTransfer)
+	s.mux.HandleFunc("POST /api/v1/transfers/{id}/pause", s.pauseTransfer)
+	s.mux.HandleFunc("POST /api/v1/transfers/{id}/resume", s.resumeTransfer)
+	s.mux.HandleFunc("DELETE /api/v1/transfers/{id}", s.removeTransfer)
 }
 
 func (s *Server) health(w http.ResponseWriter, r *http.Request) {
@@ -122,10 +126,60 @@ func (s *Server) addTransfer(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusServiceUnavailable, "engine_unavailable", "transfer engine is not available")
 			return
 		}
+		if errors.Is(err, engine.ErrUnsupported) {
+			writeError(w, http.StatusUnprocessableEntity, "capability_unsupported", "transfer engine does not support magnet ingestion")
+			return
+		}
 		writeError(w, http.StatusBadRequest, "invalid_transfer", err.Error())
 		return
 	}
 	writeJSON(w, http.StatusAccepted, transfer)
+}
+
+func (s *Server) pauseTransfer(w http.ResponseWriter, r *http.Request) {
+	transfer, err := s.manager.Pause(r.Context(), r.PathValue("id"))
+	if err != nil {
+		s.writeLifecycleError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, transfer)
+}
+
+func (s *Server) resumeTransfer(w http.ResponseWriter, r *http.Request) {
+	transfer, err := s.manager.Resume(r.Context(), r.PathValue("id"))
+	if err != nil {
+		s.writeLifecycleError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, transfer)
+}
+
+func (s *Server) removeTransfer(w http.ResponseWriter, r *http.Request) {
+	deleteData := false
+	if raw := r.URL.Query().Get("delete_data"); raw != "" {
+		var err error
+		deleteData, err = strconv.ParseBool(raw)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, "invalid_request", "delete_data must be true or false")
+			return
+		}
+	}
+	if err := s.manager.Remove(r.Context(), r.PathValue("id"), deleteData); err != nil {
+		s.writeLifecycleError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (s *Server) writeLifecycleError(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, core.ErrTransferNotFound):
+		writeError(w, http.StatusNotFound, "transfer_not_found", "transfer was not found")
+	case errors.Is(err, engine.ErrUnavailable):
+		writeError(w, http.StatusServiceUnavailable, "engine_unavailable", "transfer engine is not available")
+	default:
+		writeError(w, http.StatusConflict, "operation_failed", err.Error())
+	}
 }
 
 func writeError(w http.ResponseWriter, status int, code, message string) {
