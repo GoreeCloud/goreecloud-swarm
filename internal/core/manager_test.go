@@ -17,9 +17,10 @@ type acceptingEngine struct {
 func (acceptingEngine) Capabilities(context.Context) engine.Capabilities {
 	return engine.Capabilities{Ready: true, Name: "test", Version: "1", Supported: []engine.Capability{engine.CapabilityMagnet}}
 }
-func (acceptingEngine) Add(context.Context, engine.AddRequest) error { return nil }
-func (e acceptingEngine) Pause(context.Context, string) error        { return e.pauseErr }
-func (e acceptingEngine) Resume(context.Context, string) error       { return e.resumeErr }
+func (acceptingEngine) Add(context.Context, engine.AddRequest) error               { return nil }
+func (acceptingEngine) AddTorrent(context.Context, engine.AddTorrentRequest) error { return nil }
+func (e acceptingEngine) Pause(context.Context, string) error                      { return e.pauseErr }
+func (e acceptingEngine) Resume(context.Context, string) error                     { return e.resumeErr }
 func (e acceptingEngine) Remove(context.Context, string, bool) error {
 	return e.removeErr
 }
@@ -84,6 +85,25 @@ func TestRejectedPauseDoesNotChangeAuthoritativeState(t *testing.T) {
 	if current.State != StatePending {
 		t.Fatalf("state changed after rejected pause: %q", current.State)
 	}
+}
+
+func TestAddTorrentUsesParsedVersionCapability(t *testing.T) {
+	m := NewManager(acceptingTorrentEngine{})
+	info := "d6:lengthi4e4:name4:test12:piece lengthi16384e6:pieces20:aaaaaaaaaaaaaaaaaaaae"
+	data := []byte("d4:info" + info + "e")
+	transfer, err := m.AddTorrent(context.Background(), data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if transfer.Name != "test" {
+		t.Fatalf("name = %q", transfer.Name)
+	}
+}
+
+type acceptingTorrentEngine struct{ acceptingEngine }
+
+func (acceptingTorrentEngine) Capabilities(context.Context) engine.Capabilities {
+	return engine.Capabilities{Ready: true, Name: "test", Version: "1", Supported: []engine.Capability{engine.CapabilityTorrentV1}}
 }
 
 func TestLifecycleMissingTransfer(t *testing.T) {
