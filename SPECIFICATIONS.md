@@ -1,70 +1,63 @@
-# GoreeCloud Swarm — Repository Specifications
+# Swarm Repository Specifications
 
 ## Authority
 
-The canonical product specification is maintained in Google Drive as **Project Specification — Swarm** under `GoreeCloud/Projects`. This repository copy summarizes implementation-coupled requirements and must not silently redefine the canonical specification.
+The canonical product specification is **Project Specification — Swarm.docx** in `GoreeCloud/Projects` on the authoritative GoreeCloud Google Drive. This repository document records only implementation-coupled requirements needed to understand and validate the source tree; it does not replace the canonical specification.
 
-## Current implementation status
+## Current lifecycle
 
-**Lifecycle:** Development / pre-alpha  
-**Development model:** Native GoreeCloud repository  
-**Production ready:** No
+- Product: GoreeCloud Swarm
+- Repository: `GoreeCloud/goreecloud-swarm`
+- Development model: native GoreeCloud repository; not a direct upstream fork
+- Lifecycle: Development / pre-alpha
+- Production ready: no
+- Stable eligible: no
 
-The current repository implements the first Swarm service and metainfo-inspection foundation. It does not yet perform BitTorrent transfers.
+## Current implemented foundation
+
+The current repository implements the first Swarm service foundation, native torrent metainfo inspection, and a versioned isolated engine-sidecar client. It does not yet perform BitTorrent transfers.
 
 Implemented foundation:
 
-- independent `swarmd` service process;
-- versioned local HTTP API under `/api/v1`;
-- truthful health and engine-capability reporting;
-- replaceable transfer-engine contract;
-- magnet URI parsing and validation;
-- bounded native bencode decoding;
-- v1/v2/hybrid `.torrent` metainfo inspection and raw-info hashing;
-- authorized storage-path guards;
-- application-owned transfer lifecycle model;
-- loopback-only management listener until remote authentication exists;
-- unit/API validation and CI build gates.
+- `swarmd`, a local service process.
+- A versioned `/api/v1/` HTTP surface.
+- Loopback-only binding until remote authentication exists.
+- Transfer-engine abstraction with explicit capability reporting.
+- Isolated versioned engine-sidecar launcher and handshake.
+- Truthful degraded health when no engine is connected.
+- Magnet URI validation.
+- Storage path-boundary validation.
+- Application-owned transfer state primitives.
+- CI gates for formatting, vetting, tests, and build.
 
-## Architectural contract
+## Required architecture
+
+The source must preserve this authority chain:
 
 ```text
 Clients
   -> Swarm Application API
-  -> Swarm service and policy layer
-  -> Swarm-owned engine interface
-  -> bounded transfer-engine adapter
+  -> Swarm service/policy layer
+  -> replaceable Engine interface
+  -> BitTorrent / peer-to-peer engine adapter
   -> network and filesystem
 ```
 
-A future BitTorrent implementation may be a mature third-party dependency, but it must remain behind the Swarm-owned engine and policy boundaries. Swarm must not become a direct fork of another torrent client.
+A third-party BitTorrent implementation may be introduced only as a bounded engine dependency behind the GoreeCloud-owned interface. Its APIs must not become the application contract.
 
-## Required behavior
+## Security and privacy requirements
 
-- Requested operations must not be represented as accepted or completed until the responsible subsystem confirms them.
-- Untrusted torrent, magnet, tracker, peer, path, API, and imported configuration data must be validated and bounded.
-- Metainfo parsing must impose explicit input, nesting, string, and container limits before engine ingestion.
-- Local operation must not require a GoreeCloud account.
-- Remote administration must remain disabled until authentication, authorization, session, transport, rate-limit, and audit requirements are implemented and verified.
-- Downloaded content must never be automatically executed.
-- File paths supplied by torrent metadata must remain inside an authorized storage boundary.
-- External engine capabilities must be discovered and represented truthfully rather than assumed.
+- Treat torrent metadata, magnet links, trackers, peer data, files, API requests, and imported configuration as untrusted input.
+- Do not expose the administration API beyond loopback until authentication and authorization are implemented and tested.
+- Do not claim anonymity, Privacy Shield protection, Wardveil protection, Everkeep recovery, or other platform acceptance without authoritative evidence.
+- Do not automatically execute downloaded content.
+- Keep telemetry off unless separately implemented and governed.
+- Prevent torrent-controlled paths from escaping authorized storage roots.
 
-## GoreeCloud Platform Systems
+## Platform systems
 
-Swarm must evaluate and eventually integrate all currently required GoreeCloud Platform Systems where applicable:
+All eight GoreeCloud Platform Systems must be evaluated: GoreeCloud Manager, Privacy Shield, Wardveil Security, Everkeep, Glaze UI, GoreeCloud Mesh, GoreeCloud Identity, and GoreeCloud Sync. None is currently represented as runtime-complete in this repository.
 
-- GoreeCloud Manager
-- Privacy Shield
-- Wardveil Security
-- Everkeep
-- Glaze UI
-- GoreeCloud Mesh
-- GoreeCloud Identity
-- GoreeCloud Sync
+## Validation
 
-None of these runtime integrations is complete in this foundation. Repository metadata and UI must not imply otherwise.
-
-## V1 implementation target
-
-The production-oriented V1 target remains broader than this foundation and includes a real BitTorrent engine adapter, `.torrent` and magnet transfer operation, storage management, interface binding and Network Lock, proxy support, transfer inspection, persistence/recovery, secure updates, local API, basic Web UI, accessibility, and interoperability/security/privacy testing.
+A material capability is not complete merely because an API or UI exists. Implementation claims require code plus applicable tests, security/privacy review, interoperability validation, accessibility validation, runtime evidence, and documentation alignment.
