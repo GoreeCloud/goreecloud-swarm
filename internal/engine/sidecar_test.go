@@ -43,6 +43,9 @@ func TestSidecarHandshakeAndCalls(t *testing.T) {
 	if err := sidecar.Add(ctx, AddRequest{ID: "abc", MagnetURI: "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567"}); err != nil {
 		t.Fatal(err)
 	}
+	if err := sidecar.AddTorrent(ctx, AddTorrentRequest{ID: "torrent", Metainfo: []byte("d4:infodee")}); err != nil {
+		t.Fatal(err)
+	}
 	if err := sidecar.Pause(ctx, "abc"); err != nil {
 		t.Fatal(err)
 	}
@@ -84,7 +87,7 @@ func runEngineHelper() {
 			}
 			raw, _ := json.Marshal(result)
 			resp.Result = raw
-		case "add", "pause", "resume", "remove":
+		case "add", "add_torrent", "pause", "resume", "remove":
 			resp.Result = json.RawMessage(`{}`)
 		case "shutdown":
 			_ = encoder.Encode(resp)
