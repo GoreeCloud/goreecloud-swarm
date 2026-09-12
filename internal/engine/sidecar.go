@@ -15,7 +15,7 @@ import (
 
 const (
 	SidecarProtocolVersion = 1
-	maxSidecarMessageBytes = 1 << 20
+	maxSidecarMessageBytes = 24 << 20
 )
 
 var (
