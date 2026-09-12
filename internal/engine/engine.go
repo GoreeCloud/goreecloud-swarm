@@ -5,7 +5,10 @@ import (
 	"errors"
 )
 
-var ErrUnavailable = errors.New("transfer engine unavailable")
+var (
+	ErrUnavailable = errors.New("transfer engine unavailable")
+	ErrUnsupported = errors.New("transfer engine capability unsupported")
+)
 
 type Capability string
 
@@ -28,6 +31,15 @@ type Capabilities struct {
 	Version    string       `json:"version,omitempty"`
 	Supported  []Capability `json:"supported"`
 	Limitation string       `json:"limitation,omitempty"`
+}
+
+func (c Capabilities) Supports(want Capability) bool {
+	for _, capability := range c.Supported {
+		if capability == want {
+			return true
+		}
+	}
+	return false
 }
 
 type AddRequest struct {
