@@ -8,13 +8,14 @@ The canonical product direction is maintained in `GoreeCloud/Projects/Project Sp
 - Engine abstraction.
 - Local API and truthful health state.
 - Magnet validation.
+- Bounded bencode parsing and v1/v2/hybrid metainfo inspection.
 - Storage path safety.
 - Transfer domain model.
 - CI and repository controls.
 
 ## V1 — next implementation priorities
 
-1. Bencode and `.torrent` metainfo parser with strict limits and fuzz-test targets.
+1. Add fuzz targets and broader compatibility fixtures for bencode and metainfo parsing.
 2. Select and document the initial mature BitTorrent engine dependency and licensing/provenance.
 3. Implement the Swarm Engine Adapter without exposing third-party APIs to clients.
 4. Add real magnet and `.torrent` ingestion, pause/resume/remove, and capability negotiation.
