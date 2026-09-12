@@ -1,0 +1,136 @@
+schema_version: '0.2'
+component:
+  type: application
+  id: goreecloud-swarm
+  product_name: GoreeCloud Swarm
+  repository: GoreeCloud/goreecloud-swarm
+lifecycle: development
+version: '0.0.1-foundation'
+license: AGPL-3.0-or-later
+supported_platforms:
+  - linux
+api:
+  versions:
+    - v1
+  endpoints:
+    - /api/v1/health
+    - /api/v1/capabilities
+    - /api/v1/transfers
+    - /api/v1/transfers/torrent
+    - /api/v1/transfers/{id}/pause
+    - /api/v1/transfers/{id}/resume
+    - /api/v1/transfers/{id}
+platform_systems:
+  manager:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - SPECIFICATIONS.md
+    notes: Read-only operational integration is planned but not implemented.
+  privacy_shield:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - PRIVACY POLICY.md
+      - SPECIFICATIONS.md
+    notes: No authoritative Privacy Shield runtime acceptance exists yet.
+  wardveil_security:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - SECURITY.md
+    notes: No authoritative Wardveil runtime verdict or enforcement integration exists yet.
+  everkeep:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - FEATURE-ROADMAP.md
+    notes: Durable backup, restoration, and recovery verification are not implemented.
+  glaze_ui:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - BRANDING.md
+      - FEATURE-ROADMAP.md
+    notes: No graphical Glaze UI client is implemented yet.
+  mesh:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - SPECIFICATIONS.md
+    notes: No Mesh capabilities, events, or runtime acceptance are implemented.
+    capabilities: []
+    dependencies: []
+    published_events: []
+    consumed_events: []
+  identity:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - SECURITY.md
+      - FEATURE-ROADMAP.md
+    notes: Authentication, authorization, sessions, and device identity are not implemented.
+  sync:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - SPECIFICATIONS.md
+    notes: No GoreeCloud Sync contract or runtime synchronization is implemented.
+health:
+  health_endpoint: /api/v1/health
+  readiness_endpoint: /api/v1/health
+continuity:
+  backup:
+    required: true
+    requirements:
+      - Define and validate Everkeep protection before durable Swarm state becomes production-dependent.
+  restore:
+    required: true
+    requirements:
+      - Verify application state restoration and transfer-integrity recovery before recovery-ready claims.
+  export:
+    required: true
+    requirements:
+      - Provide user-controlled configuration and transfer-state export without exposing secrets.
+  portability:
+    required: true
+    requirements:
+      - Keep engine-independent application state and documented formats wherever practical.
+external_dependencies:
+  - name: Go toolchain
+    required: true
+    status: development-build
+    version: '1.23+'
+compatibility:
+  platform_contract: '0.2'
+  requires:
+    - goreecloud-platform-contract==0.2
+  provides:
+    - goreecloud-swarm-service-foundation
+evidence:
+  acceptance_tests:
+    - .github/workflows/ci.yml
+    - internal/api/server_test.go
+    - internal/core/manager_test.go
+    - internal/protocol/magnet_test.go
+    - internal/storage/path_test.go
+    - internal/engine/sidecar_test.go
+    - docs/ENGINE-PROTOCOL.md
+    - docs/ENGINE-EVALUATION.md
+  release: []
+conformance:
+  status: nonconformant
+  validated_at: null
+  evidence:
+    - README.md
+    - FEATURES.md
+    - SPECIFICATIONS.md
+    - docs/ARCHITECTURE.md
+    - SECURITY.md
+    - PRIVACY POLICY.md
+  blockers:
+    - No production BitTorrent transfer engine is connected.
+    - Validated torrent ingestion reaches the Engine contract, but peer transfer, persistence, recovery, and network policy enforcement are not implemented.
+    - Remote authentication and authorization are not implemented.
+    - GoreeCloud Manager, Privacy Shield, Wardveil Security, Everkeep, Glaze UI, Mesh, Identity, and Sync runtime integrations are incomplete.
+    - Production interoperability, security, privacy, accessibility, deployment, rollback, and recovery acceptance are incomplete.

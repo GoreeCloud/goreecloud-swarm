@@ -1,0 +1,22 @@
+# Build output
+/bin/
+/dist/
+*.exe
+*.test
+*.out
+
+# Runtime state
+/data/
+*.db
+*.db-shm
+*.db-wal
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
