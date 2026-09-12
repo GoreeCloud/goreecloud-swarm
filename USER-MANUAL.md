@@ -1,70 +1,50 @@
-# GoreeCloud Swarm — Development User Manual
+# Swarm User Manual
 
-## Current scope
+## Current supported use
 
-Swarm is in development/pre-alpha. The current build is a service and metainfo-inspection foundation for developers and testers; it is not yet a usable BitTorrent transfer client.
+Swarm is currently a development service foundation, not a usable BitTorrent client. The present build is intended for developer validation only.
 
-## Requirements
+## Start the development service
 
-- Go 1.23 or newer.
-- A local development environment capable of binding a loopback TCP port.
-
-## Start the service
+Requires Go 1.23 or newer compatible with the current module declaration.
 
 ```bash
 go run ./cmd/swarmd
 ```
 
-The default listener is `127.0.0.1:8080`. A different loopback address may be supplied:
+The service binds to `127.0.0.1:8080` by default. A different **loopback** address may be selected:
 
 ```bash
 SWARM_LISTEN_ADDR=127.0.0.1:9090 go run ./cmd/swarmd
 ```
 
-The service intentionally refuses non-loopback addresses until authenticated remote management is implemented.
+Non-loopback addresses are intentionally rejected because remote authentication and authorization are not implemented.
 
-## Check health and capabilities
+## Check service state
 
 ```bash
 curl http://127.0.0.1:8080/api/v1/health
-curl http://127.0.0.1:8080/api/v1/capabilities
 ```
 
-The expected health state is currently `degraded` with `ready: false` because no transfer engine adapter is connected.
+The expected current result is `status: degraded` and `ready: false` because no BitTorrent engine adapter is connected.
 
-## Inspect a `.torrent` file
+## Current transfer behavior
 
-The development API can inspect bounded v1, v2, or hybrid metainfo without starting a transfer:
+Submitting a valid magnet link to `POST /api/v1/transfers` currently returns HTTP `503` with `engine_unavailable`. This is intentional and prevents the development API from pretending a transfer began when no engine exists.
 
-```bash
-curl --data-binary @example.torrent \
-  http://127.0.0.1:8080/api/v1/metainfo/inspect
-```
+## Troubleshooting
 
-The response may include the torrent name, format, private flag, piece length, file count, total size, accepted tracker URLs, and v1/v2 info hashes. The current inspection endpoint accepts at most 16 MiB of metainfo.
+- If the configured port is already in use, select another loopback port with `SWARM_LISTEN_ADDR`.
+- If the process refuses to start on `0.0.0.0` or another external address, this is expected security behavior in the current development stage.
 
-## Transfer endpoint
+Normal torrent downloading, desktop UI, remote management, and mobile operation are not yet available.
 
-A development caller may exercise magnet validation with:
+## Pause/resume/remove lifecycle
 
-```bash
-curl -i \
-  -H 'Content-Type: application/json' \
-  -d '{"magnet_uri":"magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567"}' \
-  http://127.0.0.1:8080/api/v1/transfers
-```
+The development API now defines lifecycle routes for accepted transfers:
 
-Until the first real engine adapter exists, a valid request returns HTTP 503 with `engine_unavailable`. This prevents the application from claiming that a transfer was accepted when it was not.
+- `POST /api/v1/transfers/{id}/pause`
+- `POST /api/v1/transfers/{id}/resume`
+- `DELETE /api/v1/transfers/{id}?delete_data=false`
 
-## Validate a development checkout
-
-```bash
-gofmt -w .
-go vet ./...
-go test ./...
-go build ./cmd/swarmd
-```
-
-## Unsupported in this foundation
-
-Downloading, seeding, starting transfers from inspected torrent files, persistence, remote administration, Web UI, desktop UI, mobile clients, and production deployment are not yet supported.
+These routes are operational only when a configured engine has accepted the transfer. With the default unavailable engine, no transfer can be created, so these controls are not yet usable for real BitTorrent work. `delete_data=true` is an explicit destructive intent flag and remains subject to future storage-policy authorization before production use.
