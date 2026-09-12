@@ -22,13 +22,14 @@ func testServer() *Server {
 type acceptingAPIEngine struct{}
 
 func (acceptingAPIEngine) Capabilities(context.Context) engine.Capabilities {
-	return engine.Capabilities{Ready: true, Name: "test", Version: "1", Supported: []engine.Capability{engine.CapabilityMagnet}}
+	return engine.Capabilities{Ready: true, Name: "test", Version: "1", Supported: []engine.Capability{engine.CapabilityMagnet, engine.CapabilityTorrentV1}}
 }
-func (acceptingAPIEngine) Add(context.Context, engine.AddRequest) error { return nil }
-func (acceptingAPIEngine) Pause(context.Context, string) error          { return nil }
-func (acceptingAPIEngine) Resume(context.Context, string) error         { return nil }
-func (acceptingAPIEngine) Remove(context.Context, string, bool) error   { return nil }
-func (acceptingAPIEngine) Close() error                                 { return nil }
+func (acceptingAPIEngine) Add(context.Context, engine.AddRequest) error               { return nil }
+func (acceptingAPIEngine) AddTorrent(context.Context, engine.AddTorrentRequest) error { return nil }
+func (acceptingAPIEngine) Pause(context.Context, string) error                        { return nil }
+func (acceptingAPIEngine) Resume(context.Context, string) error                       { return nil }
+func (acceptingAPIEngine) Remove(context.Context, string, bool) error                 { return nil }
+func (acceptingAPIEngine) Close() error                                               { return nil }
 
 func acceptingTestServer() *Server {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
@@ -95,6 +96,25 @@ func TestInspectMetainfoRejectsInvalidData(t *testing.T) {
 	testServer().Handler().ServeHTTP(rec, req)
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("status = %d body=%s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestAddTorrentTransfer(t *testing.T) {
+	srv := acceptingTestServer()
+	info := "d6:lengthi4e4:name4:test12:piece lengthi16384e6:pieces20:aaaaaaaaaaaaaaaaaaaae"
+	body := "d4:info" + info + "e"
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/transfers/torrent", strings.NewReader(body))
+	rec := httptest.NewRecorder()
+	srv.Handler().ServeHTTP(rec, req)
+	if rec.Code != http.StatusAccepted {
+		t.Fatalf("status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	var transfer core.Transfer
+	if err := json.Unmarshal(rec.Body.Bytes(), &transfer); err != nil {
+		t.Fatal(err)
+	}
+	if transfer.Name != "test" {
+		t.Fatalf("name = %q", transfer.Name)
 	}
 }
 
