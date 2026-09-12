@@ -8,17 +8,19 @@ Development / pre-alpha. Swarm is not production-ready and no Stable security cl
 
 - `swarmd` refuses non-loopback HTTP binds while remote authentication is absent.
 - HTTP request bodies for transfer creation are bounded.
-- Unknown JSON fields are rejected for the current transfer-create request.
-- Security headers disable MIME sniffing, referrer disclosure, and response caching for API responses.
-- Magnet and tracker inputs are validated before reaching an engine.
-- Storage path helpers reject absolute paths and parent traversal outside the authorized root.
-- Failed engine add requests do not become authoritative transfer records.
-- No downloaded file is automatically executed because download execution does not exist yet.
-- A configured engine sidecar must use an absolute executable path, is launched without a shell or PATH lookup, does not inherit the `swarmd` environment, and must complete a bounded versioned handshake.
+- Unknown JSON fields are rejected for the current magnet transfer-create request.
+- Responses include baseline `nosniff`, no-referrer, and no-store headers.
+- Magnet URIs and tracker schemes are validated before they reach an engine.
+- `.torrent` metainfo is parsed and classified as v1, v2, or hybrid before Engine-contract dispatch.
+- Storage path helpers reject absolute paths and parent traversal outside the authorized download root.
+- A failed engine operation is not recorded as an accepted transfer.
+- The current default engine placeholder performs no network transfer and truthfully reports itself unavailable.
+- A configured engine sidecar must use an absolute executable path, is launched without a shell or PATH lookup, and does not inherit the `swarmd` environment.
+- A real sidecar additionally requires an explicit existing absolute download root; Swarm resolves that root before launch and sends it through the versioned handshake.
 
 ## Untrusted input model
 
-Future torrent metadata, peer messages, tracker responses, file paths, imported configuration, API calls, and integration events must all be treated as untrusted input. Parser and resource-exhaustion testing are release requirements, not optional hardening.
+Future peer messages, tracker responses, downloaded file names/paths, imported configuration, API calls, and integration events must all be treated as untrusted input. Parser and resource-exhaustion testing are release requirements, not optional hardening.
 
 ## Remote management
 
