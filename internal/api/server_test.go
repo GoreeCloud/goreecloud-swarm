@@ -53,3 +53,30 @@ func TestSecurityHeaders(t *testing.T) {
 		t.Fatalf("X-Content-Type-Options = %q", got)
 	}
 }
+
+func TestInspectMetainfoV1(t *testing.T) {
+	info := "d6:lengthi4e4:name4:test12:piece lengthi16384e6:pieces20:aaaaaaaaaaaaaaaaaaaae"
+	body := "d4:info" + info + "e"
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/metainfo/inspect", strings.NewReader(body))
+	rec := httptest.NewRecorder()
+	testServer().Handler().ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	var meta map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &meta); err != nil {
+		t.Fatal(err)
+	}
+	if meta["version"] != "v1" || meta["name"] != "test" {
+		t.Fatalf("unexpected metainfo: %s", rec.Body.String())
+	}
+}
+
+func TestInspectMetainfoRejectsInvalidData(t *testing.T) {
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/metainfo/inspect", strings.NewReader("not-bencode"))
+	rec := httptest.NewRecorder()
+	testServer().Handler().ServeHTTP(rec, req)
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d body=%s", rec.Code, rec.Body.String())
+	}
+}
