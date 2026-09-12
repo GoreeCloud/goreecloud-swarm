@@ -1,0 +1,132 @@
+schema_version: '0.2'
+component:
+  type: application
+  id: goreecloud-swarm
+  product_name: GoreeCloud Swarm
+  repository: GoreeCloud/goreecloud-swarm
+lifecycle: development
+version: '0.0.1-foundation'
+license: AGPL-3.0-or-later
+supported_platforms:
+  - linux
+api:
+  versions:
+    - v1
+  endpoints:
+    - /api/v1/health
+    - /api/v1/capabilities
+    - /api/v1/transfers
+platform_systems:
+  manager:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - SPECIFICATIONS.md
+    notes: Manager integration is planned but not implemented.
+  privacy_shield:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - PRIVACY POLICY.md
+      - SPECIFICATIONS.md
+    notes: Privacy Shield runtime authorization and accepted privacy evidence are not implemented.
+  wardveil_security:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - SECURITY.md
+    notes: Wardveil runtime acceptance and security evidence are not implemented.
+  everkeep:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - SPECIFICATIONS.md
+      - FEATURE-ROADMAP.md
+    notes: Durable backup, restore, preservation, and recovery verification are not implemented.
+  glaze_ui:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - BRANDING.md
+      - FEATURE-ROADMAP.md
+    notes: No Swarm Glaze UI client is implemented in this foundation.
+  mesh:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - SPECIFICATIONS.md
+    notes: No Mesh runtime capabilities or events are implemented.
+    capabilities: []
+    dependencies: []
+    published_events: []
+    consumed_events: []
+  identity:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - SECURITY.md
+      - SPECIFICATIONS.md
+    notes: Identity authentication, authorization, session, and device integration are not implemented.
+  sync:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - SPECIFICATIONS.md
+      - FEATURE-ROADMAP.md
+    notes: GoreeCloud Sync integration has not been designed or implemented for Swarm yet.
+health:
+  health_endpoint: /api/v1/health
+  readiness_endpoint: /api/v1/health
+continuity:
+  backup:
+    required: true
+    requirements:
+      - Define accepted Everkeep protection before durable Swarm state becomes production-dependent.
+  restore:
+    required: true
+    requirements:
+      - Verify restoration and state integrity before recovery-ready claims.
+  export:
+    required: true
+    requirements:
+      - Provide user-controlled portable export for supported Swarm configuration and user-owned transfer metadata where appropriate.
+  portability:
+    required: true
+    requirements:
+      - Keep application-owned configuration and state documented and portable where practical.
+external_dependencies:
+  - name: Go toolchain
+    required: true
+    status: development-build
+    version: '1.23+'
+compatibility:
+  platform_contract: '0.2'
+  requires:
+    - goreecloud-platform-contract==0.2
+  provides:
+    - goreecloud-swarm-service-foundation
+evidence:
+  acceptance_tests:
+    - .github/workflows/ci.yml
+    - cmd/swarmd/main_test.go
+    - internal/api/server_test.go
+    - internal/core/manager_test.go
+    - internal/protocol/magnet_test.go
+    - internal/storage/path_test.go
+  release: []
+conformance:
+  status: nonconformant
+  validated_at: null
+  evidence:
+    - README.md
+    - FEATURES.md
+    - SPECIFICATIONS.md
+    - SECURITY.md
+    - PRIVACY POLICY.md
+    - docs/ARCHITECTURE.md
+  blockers:
+    - No real BitTorrent engine adapter or peer transfer is implemented.
+    - Torrent metainfo parsing, persistence, storage management, Network Lock, proxy routing, and authenticated remote management are incomplete.
+    - GoreeCloud Manager, Privacy Shield, Wardveil Security, Everkeep, Glaze UI, GoreeCloud Mesh, GoreeCloud Identity, and GoreeCloud Sync runtime integrations are incomplete.
+    - Interoperability, security, privacy, accessibility, performance, deployment, rollback, and recovery acceptance are incomplete.
+    - Production release evidence does not exist.
