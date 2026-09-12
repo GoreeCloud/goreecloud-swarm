@@ -10,15 +10,17 @@ The sidecar protocol keeps the BitTorrent implementation behind a GoreeCloud-own
 
 ## Process launch
 
-A sidecar is enabled only when `SWARM_ENGINE_PATH` contains an absolute executable path.
+A sidecar is enabled only when `SWARM_ENGINE_PATH` contains an absolute executable path. `SWARM_DOWNLOAD_ROOT` must also identify an absolute existing directory.
 
 Security properties of the current launcher:
 
 - no shell is used;
 - no PATH lookup is used;
 - a relative executable path is rejected;
+- the configured download root is required, resolved through symlinks once at startup, and must remain a directory;
 - the child does not inherit the `swarmd` environment;
-- the child receives only `SWARM_ENGINE_PROTOCOL_VERSION=1`;
+- the child receives only `SWARM_ENGINE_PROTOCOL_VERSION=1` through its environment;
+- the resolved download root is sent explicitly in the versioned handshake;
 - stderr may be forwarded to the service diagnostic sink;
 - stdin/stdout are reserved for the protocol.
 
@@ -31,7 +33,7 @@ Messages are UTF-8 JSON objects separated by a newline. Each message is limited 
 Request:
 
 ```json
-{"id":1,"method":"hello","params":{"protocol_version":1,"client":"swarmd"}}
+{"id":1,"method":"hello","params":{"protocol_version":1,"client":"swarmd","download_root":"/authorized/download/root"}}
 ```
 
 Successful response:
@@ -52,7 +54,7 @@ Response IDs must exactly match request IDs.
 
 The first request is `hello`.
 
-The engine must return:
+The engine receives the Swarm-approved resolved download root and must return:
 
 - the accepted protocol version;
 - a truthful readiness state;
@@ -96,6 +98,8 @@ Current client methods:
 
 A successful transport-level response does not automatically establish that a transfer is private, secure, persisted, protected, or complete. The responsible Swarm subsystem must independently accept and expose those states.
 
+The download root establishes only the initial filesystem authority boundary supplied to the engine. Future Storage Manager operations must further constrain file allocation, relocation, symlink behavior, removable storage, and destructive deletion.
+
 ## Failure behavior
 
-Malformed JSON, oversized messages, response-ID mismatches, protocol-version mismatches, unexpected stream closure, and engine-reported errors are treated as explicit failures. Context expiry terminates the engine process rather than allowing an unbounded request to remain active.
+Malformed JSON, oversized messages, response-ID mismatches, protocol-version mismatches, invalid download-root configuration, unexpected stream closure, and engine-reported errors are treated as explicit failures. Context expiry terminates the engine process rather than allowing an unbounded request to remain active.
