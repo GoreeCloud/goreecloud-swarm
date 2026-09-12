@@ -114,6 +114,10 @@ func (s *Sidecar) Add(ctx context.Context, req AddRequest) error {
 	return s.call(ctx, "add", req, nil)
 }
 
+func (s *Sidecar) AddTorrent(ctx context.Context, req AddTorrentRequest) error {
+	return s.call(ctx, "add_torrent", req, nil)
+}
+
 func (s *Sidecar) Pause(ctx context.Context, id string) error {
 	return s.call(ctx, "pause", map[string]string{"id": id}, nil)
 }
@@ -197,6 +201,9 @@ func (s *Sidecar) call(ctx context.Context, method string, params any, out any) 
 	if resp.Error != nil {
 		if resp.Error.Code == "unavailable" {
 			return fmt.Errorf("%w: %s", ErrUnavailable, resp.Error.Message)
+		}
+		if resp.Error.Code == "unsupported" {
+			return fmt.Errorf("%w: %s", ErrUnsupported, resp.Error.Message)
 		}
 		return fmt.Errorf("engine %s: %s", resp.Error.Code, resp.Error.Message)
 	}
