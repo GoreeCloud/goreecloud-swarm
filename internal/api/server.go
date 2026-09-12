@@ -57,6 +57,7 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /api/v1/transfers", s.listTransfers)
 	s.mux.HandleFunc("POST /api/v1/metainfo/inspect", s.inspectMetainfo)
 	s.mux.HandleFunc("POST /api/v1/transfers", s.addTransfer)
+	s.mux.HandleFunc("POST /api/v1/transfers/torrent", s.addTorrentTransfer)
 	s.mux.HandleFunc("POST /api/v1/transfers/{id}/pause", s.pauseTransfer)
 	s.mux.HandleFunc("POST /api/v1/transfers/{id}/resume", s.resumeTransfer)
 	s.mux.HandleFunc("DELETE /api/v1/transfers/{id}", s.removeTransfer)
@@ -131,6 +132,34 @@ func (s *Server) addTransfer(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		writeError(w, http.StatusBadRequest, "invalid_transfer", err.Error())
+		return
+	}
+	writeJSON(w, http.StatusAccepted, transfer)
+}
+
+func (s *Server) addTorrentTransfer(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	const maxTorrentBytes = 16 << 20
+	data, err := io.ReadAll(http.MaxBytesReader(w, r.Body, maxTorrentBytes))
+	if err != nil {
+		var maxErr *http.MaxBytesError
+		if errors.As(err, &maxErr) {
+			writeError(w, http.StatusRequestEntityTooLarge, "metainfo_too_large", "torrent metainfo exceeds the ingestion limit")
+			return
+		}
+		writeError(w, http.StatusBadRequest, "invalid_metainfo", "torrent metainfo could not be read")
+		return
+	}
+	transfer, err := s.manager.AddTorrent(r.Context(), data)
+	if err != nil {
+		switch {
+		case errors.Is(err, engine.ErrUnavailable):
+			writeError(w, http.StatusServiceUnavailable, "engine_unavailable", "transfer engine is not available")
+		case errors.Is(err, engine.ErrUnsupported):
+			writeError(w, http.StatusUnprocessableEntity, "capability_unsupported", "transfer engine does not support this torrent format")
+		default:
+			writeError(w, http.StatusBadRequest, "invalid_transfer", err.Error())
+		}
 		return
 	}
 	writeJSON(w, http.StatusAccepted, transfer)
