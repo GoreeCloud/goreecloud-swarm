@@ -18,18 +18,22 @@ Transfer Manager (internal/core)
     v
 Engine interface (internal/engine)
     |
-    v
-Unavailable engine placeholder
+    +--> Unavailable engine placeholder (default)
+    |
+    +--> Versioned sidecar client
+             |
+             v
+        External engine process (planned libtorrent-rasterbar implementation)
 ```
 
-The current engine placeholder intentionally refuses transfer operations. This is a truthful development boundary: the service and API exist, but peer-to-peer transfer does not yet exist.
+The default engine placeholder intentionally refuses transfer operations. A versioned sidecar launcher/client now exists, but no production BitTorrent sidecar has been connected. This is a truthful development boundary: the service, parser, API, and engine IPC exist, but peer-to-peer transfer does not yet exist.
 
 ## Package ownership
 
 - `cmd/swarmd`: service entry point and process lifecycle.
 - `internal/api`: versioned HTTP surface and response minimization.
 - `internal/core`: application-owned transfer lifecycle and authoritative transfer state.
-- `internal/engine`: stable internal engine contract and engine capability reporting.
+- `internal/engine`: stable internal engine contract, engine capability reporting, and isolated sidecar process protocol.
 - `internal/protocol`: protocol-input parsing that must treat remote/user supplied values as untrusted.
 - `internal/storage`: path-boundary and storage-safety primitives.
 
@@ -64,7 +68,7 @@ Before an engine adapter is accepted, it should have tests for at least:
 
 ## Integral Platform Systems
 
-The repository architecture reserves explicit boundaries for the applicable GoreeCloud Platform Systems, but none are represented as implemented yet:
+The repository architecture reserves explicit boundaries for the applicable GoreeCloud platform systems, but none are represented as implemented yet:
 
 - GoreeCloud Manager — planned.
 - Privacy Shield — planned.
