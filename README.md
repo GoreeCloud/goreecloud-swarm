@@ -31,7 +31,7 @@ Not yet implemented:
 - Network Lock and proxy routing.
 - Authentication/authorization for remote management.
 - Web, desktop, mobile, or CLI clients beyond the initial `swarmd` service.
-- Privacy Shield, Wardveil, Everkeep, Mesh, Identity, Manager, or Glaze UI runtime integrations.
+- GoreeCloud Manager, Privacy Shield, Wardveil Security, Everkeep, Glaze UI, GoreeCloud Mesh, GoreeCloud Identity, or GoreeCloud Sync runtime integrations.
 
 Those capabilities remain planned until implementation evidence exists.
 
@@ -61,6 +61,10 @@ go vet ./...
 go test ./...
 go build ./cmd/swarmd
 ```
+
+## Repository controls
+
+Repository-coupled specifications, feature state, roadmap, privacy, security, branding, and platform-contract records are maintained at the repository root. The canonical full product specification remains under `GoreeCloud/Projects` in Google Drive.
 
 ## Architecture
 
