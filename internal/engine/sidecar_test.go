@@ -12,7 +12,22 @@ import (
 )
 
 func TestStartSidecarRequiresAbsolutePath(t *testing.T) {
-	_, err := StartSidecar(context.Background(), "swarm-engine", nil)
+	_, err := StartSidecar(context.Background(), "swarm-engine", "", nil)
+	if !errorsIs(err, ErrProtocol) {
+		t.Fatalf("expected ErrProtocol, got %v", err)
+	}
+}
+
+func TestStartSidecarRequiresAbsoluteDownloadRoot(t *testing.T) {
+	exe, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	helper := filepath.Join(t.TempDir(), "engine-helper")
+	if err := os.Symlink(exe, helper); err != nil {
+		t.Skipf("cannot create helper symlink: %v", err)
+	}
+	_, err = StartSidecar(context.Background(), helper, "relative", nil)
 	if !errorsIs(err, ErrProtocol) {
 		t.Fatalf("expected ErrProtocol, got %v", err)
 	}
@@ -30,7 +45,7 @@ func TestSidecarHandshakeAndCalls(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	sidecar, err := StartSidecar(ctx, helper, nil)
+	sidecar, err := StartSidecar(ctx, helper, t.TempDir(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
