@@ -14,9 +14,11 @@ Implemented in this foundation:
 - Authoritative service/core separation.
 - Replaceable transfer-engine interface.
 - Versioned isolated engine-sidecar client and handshake protocol.
+- Explicit resolved download-root authority for configured engine sidecars.
 - Local-only HTTP API default (`127.0.0.1`).
 - `/api/v1/health` and `/api/v1/capabilities` endpoints.
 - Transfer add/list/pause/resume/remove API lifecycle.
+- Validated v1/v2/hybrid `.torrent` inspection and Engine-contract ingestion path.
 - Truthful degraded health while no transfer engine is attached.
 - Magnet URI parsing and validation.
 - Download-path sanitization primitives.
@@ -33,7 +35,7 @@ Not yet implemented:
 - Network Lock and proxy routing.
 - Authentication/authorization for remote management.
 - Web, desktop, mobile, or CLI clients beyond the initial `swarmd` service.
-- Privacy Shield, Wardveil, Everkeep, Mesh, Identity, Manager, or Glaze UI runtime integrations.
+- Privacy Shield, Wardveil, Everkeep, Mesh, Identity, Manager, Sync, or Glaze UI runtime integrations.
 
 Those capabilities remain planned until implementation evidence exists.
 
@@ -54,6 +56,16 @@ Check health:
 ```bash
 curl http://127.0.0.1:8080/api/v1/health
 ```
+
+A future compatible engine sidecar is enabled with an absolute executable path and an explicit existing absolute download root:
+
+```bash
+SWARM_ENGINE_PATH=/absolute/path/to/swarm-engine \
+SWARM_DOWNLOAD_ROOT=/absolute/path/to/downloads \
+go run ./cmd/swarmd
+```
+
+No production engine executable is provided yet; this configuration is currently for engine-protocol development and validation only.
 
 ## Validate
 
