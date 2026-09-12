@@ -64,7 +64,7 @@ Before an engine adapter is accepted, it should have tests for at least:
 
 ## Integral Platform Systems
 
-The repository architecture reserves explicit boundaries for the applicable GoreeCloud platform systems, but none are represented as implemented yet:
+The repository architecture reserves explicit boundaries for the applicable GoreeCloud Platform Systems, but none are represented as implemented yet:
 
 - GoreeCloud Manager — planned.
 - Privacy Shield — planned.
@@ -73,5 +73,6 @@ The repository architecture reserves explicit boundaries for the applicable Gore
 - Glaze UI — planned.
 - GoreeCloud Mesh — planned.
 - GoreeCloud Identity — planned.
+- GoreeCloud Sync — planned.
 
 Runtime integration must be added only with the authoritative current contract for each system and must be backed by tests/evidence.
