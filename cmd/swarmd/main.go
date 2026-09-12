@@ -30,7 +30,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	transferEngine, err := openTransferEngine(context.Background(), os.Getenv("SWARM_ENGINE_PATH"))
+	transferEngine, err := openTransferEngine(context.Background(), os.Getenv("SWARM_ENGINE_PATH"), os.Getenv("SWARM_DOWNLOAD_ROOT"))
 	if err != nil {
 		logger.Error("Swarm engine startup failed", "error", err)
 		os.Exit(2)
@@ -82,9 +82,9 @@ func isLoopbackAddress(addr string) bool {
 	return ip != nil && ip.IsLoopback()
 }
 
-func openTransferEngine(ctx context.Context, executable string) (engine.Engine, error) {
+func openTransferEngine(ctx context.Context, executable, downloadRoot string) (engine.Engine, error) {
 	if executable == "" {
 		return engine.Unavailable{}, nil
 	}
-	return engine.StartSidecar(ctx, executable, os.Stderr)
+	return engine.StartSidecar(ctx, executable, downloadRoot, os.Stderr)
 }
