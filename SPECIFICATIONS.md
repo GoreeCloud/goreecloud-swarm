@@ -15,7 +15,7 @@ The canonical product specification is **Project Specification — Swarm.docx** 
 
 ## Current implemented foundation
 
-The current repository implements the first Swarm service foundation, native torrent metainfo inspection, and a versioned isolated engine-sidecar client. It does not yet perform BitTorrent transfers.
+The current repository implements the first Swarm service foundation, native torrent metainfo inspection, validated magnet/`.torrent` ingestion to the Engine contract, lifecycle control APIs, and a versioned isolated engine-sidecar client. It does not yet perform BitTorrent peer transfer.
 
 Implemented foundation:
 
@@ -24,10 +24,12 @@ Implemented foundation:
 - Loopback-only binding until remote authentication exists.
 - Transfer-engine abstraction with explicit capability reporting.
 - Isolated versioned engine-sidecar launcher and handshake.
+- Explicit absolute/resolved engine download-root authority.
 - Truthful degraded health when no engine is connected.
 - Magnet URI validation.
+- v1/v2/hybrid `.torrent` validation and Engine-contract dispatch.
 - Storage path-boundary validation.
-- Application-owned transfer state primitives.
+- Application-owned transfer lifecycle state including pause/resume/remove.
 - CI gates for formatting, vetting, tests, and build.
 
 ## Required architecture
@@ -53,6 +55,7 @@ A third-party BitTorrent implementation may be introduced only as a bounded engi
 - Do not automatically execute downloaded content.
 - Keep telemetry off unless separately implemented and governed.
 - Prevent torrent-controlled paths from escaping authorized storage roots.
+- Require an explicit resolved storage root before starting a real transfer engine.
 
 ## Platform systems
 
