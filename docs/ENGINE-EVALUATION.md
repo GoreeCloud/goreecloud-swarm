@@ -26,7 +26,7 @@ The engine must remain subordinate to the GoreeCloud-owned service/API/policy ar
 
 ## libtorrent-rasterbar — leading candidate
 
-As verified during the September 12, 2026 implementation pass, the official libtorrent project describes itself as a feature-complete C++ BitTorrent implementation focused on efficiency and scalability and documents BitTorrent v2 support in the 2.x line. The project is distributed under a BSD license.
+As verified during the September 12, 2026 implementation pass, the official libtorrent project describes itself as a feature-complete C++ BitTorrent implementation focused on efficiency and scalability and documents BitTorrent v2 support in the 2.x line. The project is distributed under a BSD license. The latest upstream non-prerelease release observed during this pass is **v2.1.1**, published **August 10, 2026**.
 
 Why it currently leads:
 
@@ -47,7 +47,7 @@ It may remain useful for future evaluation, testing, or a secondary engine if it
 
 ## Decision for the next implementation slice
 
-Proceed with the isolated sidecar architecture and treat libtorrent-rasterbar as the leading dependency candidate. Do not mark it accepted/pinned until the following are verified in an actual Swarm sidecar build:
+Proceed with the isolated sidecar architecture and use libtorrent-rasterbar **v2.1.1** as the initial evaluation pin. This is not yet an accepted production dependency. Do not mark it integrated/accepted until the following are verified in an actual Swarm sidecar build:
 
 1. exact version and source provenance;
 2. license/notice requirements;
