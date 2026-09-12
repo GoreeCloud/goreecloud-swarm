@@ -13,12 +13,15 @@ This is the repository-coupled implementation roadmap. The canonical Swarm proje
 - Repository governance controls — implemented in the initial foundation.
 - Native bounded bencode/metainfo inspection — implemented in development.
 - Versioned isolated engine-sidecar client/handshake — implemented in development.
+- Validated `.torrent` dispatch to the Engine contract — implemented in development.
+- Transfer add/list/pause/resume/remove lifecycle controls — implemented in development.
+- Explicit resolved download-root authority for configured engine sidecars — implemented in development.
 
 ## V1 — next implementation priorities
 
-1. Build the first libtorrent-rasterbar sidecar against the versioned Swarm engine protocol and pin verified provenance/licensing.
-2. Add real magnet and `.torrent` ingestion, pause/resume/remove, and runtime capability negotiation.
-3. Add engine state read models and lifecycle/error translation without exposing libtorrent APIs.
+1. Build the first libtorrent-rasterbar v2.1.1 sidecar against the versioned Swarm engine protocol and validate/pin provenance and licensing.
+2. Add real magnet and `.torrent` peer transfer through the sidecar and translate runtime engine state without exposing libtorrent APIs.
+3. Add engine state read models and lifecycle/error translation for active transfers.
 4. Add durable state/resume persistence with migrations and crash recovery.
 5. Implement the Storage Manager and safe file allocation/relocation behavior.
 6. Implement interface binding, Network Lock, proxy policy, bandwidth limits, and network diagnostics.
