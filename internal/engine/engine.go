@@ -43,13 +43,19 @@ func (c Capabilities) Supports(want Capability) bool {
 }
 
 type AddRequest struct {
-	ID        string
-	MagnetURI string
+	ID        string `json:"id"`
+	MagnetURI string `json:"magnet_uri"`
+}
+
+type AddTorrentRequest struct {
+	ID       string `json:"id"`
+	Metainfo []byte `json:"metainfo"`
 }
 
 type Engine interface {
 	Capabilities(ctx context.Context) Capabilities
 	Add(ctx context.Context, req AddRequest) error
+	AddTorrent(ctx context.Context, req AddTorrentRequest) error
 	Pause(ctx context.Context, id string) error
 	Resume(ctx context.Context, id string) error
 	Remove(ctx context.Context, id string, deleteData bool) error
@@ -67,8 +73,9 @@ func (Unavailable) Capabilities(context.Context) Capabilities {
 	}
 }
 
-func (Unavailable) Add(context.Context, AddRequest) error      { return ErrUnavailable }
-func (Unavailable) Pause(context.Context, string) error        { return ErrUnavailable }
-func (Unavailable) Resume(context.Context, string) error       { return ErrUnavailable }
-func (Unavailable) Remove(context.Context, string, bool) error { return ErrUnavailable }
-func (Unavailable) Close() error                               { return nil }
+func (Unavailable) Add(context.Context, AddRequest) error               { return ErrUnavailable }
+func (Unavailable) AddTorrent(context.Context, AddTorrentRequest) error { return ErrUnavailable }
+func (Unavailable) Pause(context.Context, string) error                 { return ErrUnavailable }
+func (Unavailable) Resume(context.Context, string) error                { return ErrUnavailable }
+func (Unavailable) Remove(context.Context, string, bool) error          { return ErrUnavailable }
+func (Unavailable) Close() error                                        { return nil }
