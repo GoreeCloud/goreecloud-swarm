@@ -1,40 +1,31 @@
-# GoreeCloud Swarm — Features
+# Swarm Features
 
-## Current implemented foundation
+## Implemented — development foundation
 
 | Capability | State | Evidence |
 | --- | --- | --- |
-| Native GoreeCloud service repository | Implemented | Repository history and README |
-| Independent `swarmd` service process | Implemented | `cmd/swarmd` |
-| Local-only management listener | Implemented | Loopback enforcement in `cmd/swarmd` |
-| Versioned API shell | Implemented | `internal/api` |
-| Health and engine capability reporting | Implemented | `/api/v1/health`, `/api/v1/capabilities` |
-| Replaceable transfer-engine boundary | Implemented | `internal/engine` |
-| Magnet URI parser | Implemented foundation | `internal/protocol` |
-| Bounded bencode decoder | Implemented foundation | `internal/protocol/bencode` |
-| v1/v2/hybrid `.torrent` metainfo inspection | Implemented foundation | `internal/protocol/torrent.go` |
-| Metainfo inspection API | Implemented foundation | `POST /api/v1/metainfo/inspect` |
-| Storage path traversal protection | Implemented foundation | `internal/storage` |
-| Transfer lifecycle domain model | Implemented foundation | `internal/core` |
-| Automated format/vet/test/build validation | Implemented | `.github/workflows/ci.yml` |
+| Native service process | Implemented, development | `cmd/swarmd` |
+| Local-only management listener | Implemented, development | `cmd/swarmd/main.go`, tests |
+| Versioned HTTP API shell | Implemented, development | `internal/api` |
+| Health and capability reporting | Implemented, development | `/api/v1/health`, `/api/v1/capabilities` |
+| Engine abstraction | Implemented, development | `internal/engine` |
+| Isolated engine-sidecar launcher and versioned handshake | Implemented foundation | `internal/engine/sidecar.go`, `docs/ENGINE-PROTOCOL.md` |
+| Magnet URI parser | Implemented, development | `internal/protocol`, tests |
+| Storage path guard | Implemented, development | `internal/storage`, tests |
+| Transfer state model | Implemented, development | `internal/core` |
+| CI format/vet/test/build gate | Implemented | `.github/workflows/ci.yml` |
 
-## Not yet implemented
+## Explicitly not implemented yet
 
-The following remain planned and must not be represented as available:
+- BitTorrent peer connections or piece transfer.
+- Production libtorrent-rasterbar engine sidecar.
+- Tracker, DHT, PEX, LPD, web-seed, NAT traversal, or peer-encryption execution.
+- Persistence, resume data, or state database.
+- Network Lock or proxy routing.
+- Storage profiles or relocation workflows.
+- Authentication, authorization, remote sessions, or externally reachable Web UI.
+- Automation, RSS/Atom, watch folders, or post-completion hooks.
+- Native desktop/mobile clients or Glaze UI surfaces.
+- Runtime GoreeCloud Manager, Privacy Shield, Wardveil, Everkeep, Mesh, Identity, or Sync integrations.
 
-- actual peer-to-peer transfer;
-- using `.torrent` metainfo to start transfers through a real engine;
-- tracker communication;
-- DHT, PEX, Local Peer Discovery, and web seeds;
-- v1/v2/hybrid torrent operation through a real engine;
-- persistent state and resume recovery;
-- storage profiles and relocation;
-- Network Lock, proxy routing, NAT traversal, and bandwidth profiles;
-- file, peer, tracker, and piece inspection backed by live engine state;
-- remote authentication, authorization, sessions, and external Web UI;
-- automation, RSS/Atom, watch folders, notifications, and CLI management;
-- desktop/mobile clients and Glaze UI implementation;
-- runtime GoreeCloud Manager, Privacy Shield, Wardveil, Everkeep, Mesh, Identity, and Sync integration;
-- production release, deployment, recovery, and Stable qualification.
-
-Feature status must continue to track implementation evidence rather than roadmap intent.
+The canonical Drive specification remains the authority for planned capability scope.
