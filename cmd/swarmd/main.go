@@ -30,7 +30,11 @@ func main() {
 		os.Exit(2)
 	}
 
-	transferEngine := engine.Unavailable{}
+	transferEngine, err := openTransferEngine(context.Background(), os.Getenv("SWARM_ENGINE_PATH"))
+	if err != nil {
+		logger.Error("Swarm engine startup failed", "error", err)
+		os.Exit(2)
+	}
 	manager := core.NewManager(transferEngine)
 	server := api.NewServer(manager, logger)
 
@@ -47,7 +51,8 @@ func main() {
 	defer stop()
 
 	go func() {
-		logger.Info("Swarm service starting", "listen_addr", addr, "engine", "unavailable", "status", "development")
+		caps := transferEngine.Capabilities(context.Background())
+		logger.Info("Swarm service starting", "listen_addr", addr, "engine", caps.Name, "engine_version", caps.Version, "engine_ready", caps.Ready, "status", "development")
 		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			logger.Error("Swarm service failed", "error", err)
 			stop()
@@ -75,4 +80,11 @@ func isLoopbackAddress(addr string) bool {
 	}
 	ip := net.ParseIP(host)
 	return ip != nil && ip.IsLoopback()
+}
+
+func openTransferEngine(ctx context.Context, executable string) (engine.Engine, error) {
+	if executable == "" {
+		return engine.Unavailable{}, nil
+	}
+	return engine.StartSidecar(ctx, executable, os.Stderr)
 }
