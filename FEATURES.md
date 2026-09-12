@@ -16,21 +16,35 @@
 | Metainfo inspection API | Implemented foundation | `POST /api/v1/metainfo/inspect` |
 | Storage path traversal protection | Implemented foundation | `internal/storage` |
 | Transfer lifecycle domain model | Implemented foundation | `internal/core` |
-| Automated format/vet/test/build validation | Implemented | `.github/workflows/ci.yml` |
+| Opt-in Anacrolix engine adapter source | Development / validation pending | `internal/engine/factory_anacrolix.go` |
+| Fail-closed engine selection | Implemented development | `internal/engine/factory*.go` |
+| Separate default/tagged engine CI gates | Implemented configuration | `.github/workflows/ci.yml` |
 
-## Not yet implemented
+## Engine adapter development state
 
-The following remain planned and must not be represented as available:
+The opt-in `anacrolix_engine` build currently contains source for:
 
-- actual peer-to-peer transfer;
-- using `.torrent` metainfo to start transfers through a real engine;
-- tracker communication;
-- DHT, PEX, Local Peer Discovery, and web seeds;
-- v1/v2/hybrid torrent operation through a real engine;
+- initializing `anacrolix/torrent` v1.61.0 with an explicit download root;
+- adding magnet transfers;
+- starting download-all behavior;
+- pausing upload and download data flow;
+- resuming upload and download data flow;
+- removing a transfer from the engine without deleting downloaded data;
+- clean engine shutdown;
+- conservative capability reporting.
+
+This code is **not yet accepted implementation evidence** for peer transfer. Hosted exact-head compilation, controlled runtime transfer tests, interoperability tests, and dependency/license review remain outstanding.
+
+## Not yet implemented or accepted
+
+The following remain planned/development and must not be represented as production-ready:
+
+- accepted/validated peer-to-peer transfer support in the default build;
+- using `.torrent` metainfo to start transfers through the engine;
 - persistent state and resume recovery;
-- storage profiles and relocation;
+- storage profiles, safe engine-owned deletion, and relocation;
 - Network Lock, proxy routing, NAT traversal, and bandwidth profiles;
-- file, peer, tracker, and piece inspection backed by live engine state;
+- file, peer, tracker, and piece inspection backed by accepted live engine state;
 - remote authentication, authorization, sessions, and external Web UI;
 - automation, RSS/Atom, watch folders, notifications, and CLI management;
 - desktop/mobile clients and Glaze UI implementation;

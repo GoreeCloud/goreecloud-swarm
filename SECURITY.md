@@ -15,19 +15,38 @@ Swarm is development/pre-alpha software and is not production-ready.
 - `.torrent` inspection validates essential v1/v2 structure before exposing metadata and computes hashes from the original raw `info` bytes.
 - Storage path helpers reject absolute paths and parent traversal outside the authorized download root.
 - A failed engine operation is not recorded as an accepted transfer.
-- The current engine placeholder performs no network transfer and truthfully reports itself unavailable.
+- Default builds contain no active BitTorrent engine and truthfully report the engine unavailable.
+- The development Anacrolix adapter is opt-in behind a build tag and runtime engine selector.
+- The tagged adapter requires an explicit download root and refuses engine-managed data deletion until a native safe-deletion policy exists.
 
-## Security boundaries not yet implemented
+## Development engine security boundary
 
-The current foundation does not provide:
+The current `anacrolix_engine` adapter is a transitional in-process engine boundary. It is useful for establishing the Swarm-owned engine contract, but it does not yet satisfy the preferred long-term process-isolation design.
+
+Enabling the tagged engine may create outbound/inbound BitTorrent traffic and write data beneath the configured download root. It must not be represented as providing:
+
+- Network Lock;
+- VPN binding or leak prevention;
+- proxy enforcement;
+- anonymity;
+- Wardveil runtime acceptance;
+- Privacy Shield runtime acceptance;
+- Everkeep recovery coverage;
+- production sandboxing.
+
+## Security boundaries not yet implemented or accepted
+
+The current development state does not provide:
 
 - remote authentication or authorization;
 - TLS termination or externally reachable Web UI;
 - session/device management;
 - rate limiting or brute-force protection for remote access;
-- BitTorrent peer/tracker protocol processing;
+- accepted/sandboxed BitTorrent peer and tracker protocol processing;
 - metainfo fuzzing and broad real-world compatibility corpus validation;
 - engine process sandboxing;
+- Network Lock or explicit interface-binding enforcement;
+- proxy-routing enforcement;
 - persistent-state encryption or database hardening;
 - signed release/update verification;
 - Wardveil runtime acceptance or security evidence.
@@ -40,7 +59,20 @@ Do not commit passwords, API tokens, private keys, recovery codes, authenticatio
 
 ## Dependency security
 
-A future BitTorrent engine or other material dependency must have its provenance, version, license, security implications, update source, and architectural boundary documented before acceptance. Third-party code must remain subordinate to Swarm's native application and policy layers.
+The initial development engine dependency is pinned to `github.com/anacrolix/torrent` v1.61.0 and documented in `docs/ENGINE-DEPENDENCY.md` and `THIRD_PARTY_NOTICES.md`.
+
+Before acceptance or distribution, GoreeCloud must complete:
+
+- exact upstream license-file verification;
+- dependency checksum/lock evidence;
+- vulnerability and maintenance review;
+- transitive dependency review appropriate to release risk;
+- controlled tagged-build tests;
+- interoperability tests;
+- runtime storage/network boundary validation;
+- SBOM/release provenance as required.
+
+Third-party code must remain subordinate to Swarm's native application and policy layers.
 
 ## Vulnerability reporting
 

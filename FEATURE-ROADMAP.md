@@ -13,18 +13,29 @@ The canonical product direction is maintained in `GoreeCloud/Projects/Project Sp
 - Transfer domain model.
 - CI and repository controls.
 
+## Engine adapter — development / validation pending
+
+- Initial dependency selected: `github.com/anacrolix/torrent` v1.61.0.
+- Provenance and architectural boundary documented.
+- Adapter is opt-in behind `anacrolix_engine`.
+- Source exists for magnet add, pause, resume, non-destructive remove, and shutdown.
+- Default builds remain on the unavailable engine.
+- Hosted tagged compilation/runtime validation is still required before the adapter is accepted.
+- Libtorrent-rasterbar remains an explicitly retained alternative for later out-of-process engine evaluation.
+
 ## V1 — next implementation priorities
 
-1. Add fuzz targets and broader compatibility fixtures for bencode and metainfo parsing.
-2. Select and document the initial mature BitTorrent engine dependency and licensing/provenance.
-3. Implement the Swarm Engine Adapter without exposing third-party APIs to clients.
-4. Add real magnet and `.torrent` ingestion, pause/resume/remove, and capability negotiation.
+1. Complete exact-head tagged engine compilation and controlled magnet-transfer validation.
+2. Add dependency checksum/lock evidence, exact license-file verification, and SBOM-ready provenance.
+3. Add fuzz targets and broader compatibility fixtures for bencode and metainfo parsing.
+4. Add `.torrent` ingestion through the engine adapter while preserving native preflight validation.
 5. Add durable state/resume persistence with migrations and crash recovery.
-6. Implement the Storage Manager and safe file allocation/relocation behavior.
+6. Implement the Storage Manager and safe file allocation/deletion/relocation behavior.
 7. Implement interface binding, Network Lock, proxy policy, bandwidth limits, and network diagnostics.
 8. Add files, peers, trackers, and pieces read models through `/api/v1`.
-9. Publish and contract-test OpenAPI for supported API resources.
-10. Begin the native desktop Glaze UI client after service behavior is sufficiently stable.
+9. Move protocol execution behind a process-isolated engine boundary and add sandboxing where practical.
+10. Publish and contract-test OpenAPI for supported API resources.
+11. Begin the native desktop Glaze UI client after service behavior is sufficiently stable.
 
 ## V2 — planned
 
@@ -50,4 +61,4 @@ The canonical product direction is maintained in `GoreeCloud/Projects/Project Sp
 
 ## Documentation synchronization
 
-A dedicated central `FEATURE-ROADMAP.docx` for Swarm has not yet been verified during this foundation pass. Until it is created or located and reconciled, this repository remains development/nonconformant rather than claiming full documentation conformance.
+A dedicated central `FEATURE-ROADMAP.docx` for Swarm has not yet been verified during this development pass. Until it is created or located and reconciled, this repository remains development/nonconformant rather than claiming full documentation conformance.

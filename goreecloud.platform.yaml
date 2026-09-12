@@ -5,7 +5,7 @@ component:
   product_name: GoreeCloud Swarm
   repository: GoreeCloud/goreecloud-swarm
 lifecycle: development
-version: '0.0.1-foundation'
+version: '0.0.2-engine-dev'
 license: AGPL-3.0-or-later
 supported_platforms:
   - linux
@@ -100,18 +100,38 @@ external_dependencies:
     required: true
     status: development-build
     version: '1.23+'
+  - name: anacrolix/torrent
+    required: false
+    status: development-optional-validation-pending
+    version: 'v1.61.0'
+    boundary: internal/engine
+    activation: build-tag-anacrolix_engine
+    evidence:
+      - docs/ENGINE-DEPENDENCY.md
+      - THIRD_PARTY_NOTICES.md
+      - go.mod
 compatibility:
   platform_contract: '0.2'
   requires:
     - goreecloud-platform-contract==0.2
   provides:
     - goreecloud-swarm-service-foundation
+    - goreecloud-swarm-anacrolix-adapter-development
+engine:
+  default: unavailable
+  optional_development_adapter: anacrolix
+  build_tag: anacrolix_engine
+  runtime_selector: SWARM_ENGINE
+  download_root_variable: SWARM_DOWNLOAD_DIR
+  accepted_for_production: false
 evidence:
   acceptance_tests:
     - .github/workflows/ci.yml
     - cmd/swarmd/main_test.go
     - internal/api/server_test.go
     - internal/core/manager_test.go
+    - internal/engine/factory_unavailable_test.go
+    - internal/engine/factory_anacrolix_test.go
     - internal/protocol/bencode/decode_test.go
     - internal/protocol/magnet_test.go
     - internal/protocol/torrent_test.go
@@ -127,9 +147,13 @@ conformance:
     - SECURITY.md
     - PRIVACY POLICY.md
     - docs/ARCHITECTURE.md
+    - docs/ENGINE-DEPENDENCY.md
+    - THIRD_PARTY_NOTICES.md
   blockers:
-    - No real BitTorrent engine adapter or peer transfer is implemented.
-    - Starting transfers from torrent metainfo, persistence, storage management, Network Lock, proxy routing, and authenticated remote management are incomplete.
+    - The opt-in Anacrolix engine adapter is development code and has not completed hosted exact-head compilation, controlled runtime transfer validation, or interoperability acceptance.
+    - Starting transfers from torrent metainfo, persistent resume state, storage management, safe data deletion, Network Lock, proxy routing, and authenticated remote management are incomplete.
+    - Engine process isolation and sandboxing are incomplete.
+    - Dependency checksum/lock evidence and exact upstream license-file verification remain incomplete.
     - GoreeCloud Manager, Privacy Shield, Wardveil Security, Everkeep, Glaze UI, GoreeCloud Mesh, GoreeCloud Identity, and GoreeCloud Sync runtime integrations are incomplete.
     - Interoperability, parser fuzzing/security, privacy, accessibility, performance, deployment, rollback, and recovery acceptance are incomplete.
     - Production release evidence does not exist.

@@ -10,7 +10,7 @@ The canonical product specification is maintained in Google Drive as **Project S
 **Development model:** Native GoreeCloud repository  
 **Production ready:** No
 
-The current repository implements the first Swarm service and metainfo-inspection foundation. It does not yet perform BitTorrent transfers.
+The repository implements the first Swarm service/metainfo foundation and now contains an opt-in development adapter for `anacrolix/torrent` v1.61.0. The adapter is not accepted as production-capable peer transfer until exact-head hosted compilation and controlled runtime/interoperability validation pass.
 
 Implemented foundation:
 
@@ -24,7 +24,9 @@ Implemented foundation:
 - authorized storage-path guards;
 - application-owned transfer lifecycle model;
 - loopback-only management listener until remote authentication exists;
-- unit/API validation and CI build gates.
+- fail-closed engine selection;
+- opt-in tagged Anacrolix adapter source for magnet add, pause, resume, non-destructive remove, and shutdown;
+- unit/API validation and separate default/tagged CI gates.
 
 ## Architectural contract
 
@@ -34,10 +36,13 @@ Clients
   -> Swarm service and policy layer
   -> Swarm-owned engine interface
   -> bounded transfer-engine adapter
+  -> BitTorrent dependency
   -> network and filesystem
 ```
 
-A future BitTorrent implementation may be a mature third-party dependency, but it must remain behind the Swarm-owned engine and policy boundaries. Swarm must not become a direct fork of another torrent client.
+The initial development dependency is Anacrolix/torrent v1.61.0. It remains subordinate to the Swarm-owned engine contract. Swarm clients and product-facing packages must not depend directly on third-party engine APIs.
+
+Libtorrent-rasterbar remains an evaluated alternative for later interoperability/performance work and for the planned out-of-process engine boundary. The current dependency choice is not permanent architecture.
 
 ## Required behavior
 
@@ -48,7 +53,9 @@ A future BitTorrent implementation may be a mature third-party dependency, but i
 - Remote administration must remain disabled until authentication, authorization, session, transport, rate-limit, and audit requirements are implemented and verified.
 - Downloaded content must never be automatically executed.
 - File paths supplied by torrent metadata must remain inside an authorized storage boundary.
-- External engine capabilities must be discovered and represented truthfully rather than assumed.
+- External engine capabilities must be represented conservatively and must not be confused with runtime privacy/security acceptance.
+- Engine activation must remain explicit during development; default builds must not silently begin peer-to-peer networking.
+- Deleting downloaded data through an external engine must remain blocked until Swarm's native storage policy can verify the deletion boundary.
 
 ## GoreeCloud Platform Systems
 
@@ -63,8 +70,8 @@ Swarm must evaluate and eventually integrate all currently required GoreeCloud P
 - GoreeCloud Identity
 - GoreeCloud Sync
 
-None of these runtime integrations is complete in this foundation. Repository metadata and UI must not imply otherwise.
+None of these runtime integrations is complete in the current development state. Repository metadata and UI must not imply otherwise.
 
 ## V1 implementation target
 
-The production-oriented V1 target remains broader than this foundation and includes a real BitTorrent engine adapter, `.torrent` and magnet transfer operation, storage management, interface binding and Network Lock, proxy support, transfer inspection, persistence/recovery, secure updates, local API, basic Web UI, accessibility, and interoperability/security/privacy testing.
+The production-oriented V1 target remains broader than the current branch and includes a validated BitTorrent engine adapter, `.torrent` and magnet transfer operation, durable resume state, storage management, interface binding and Network Lock, proxy support, transfer inspection, process isolation, secure updates, local API, basic Web UI, accessibility, and interoperability/security/privacy testing.
