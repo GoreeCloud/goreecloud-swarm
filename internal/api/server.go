@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/GoreeCloud/goreecloud-swarm/internal/core"
 	"github.com/GoreeCloud/goreecloud-swarm/internal/engine"
+	"github.com/GoreeCloud/goreecloud-swarm/internal/protocol"
 )
 
 type Server struct {
@@ -52,6 +54,7 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /api/v1/health", s.health)
 	s.mux.HandleFunc("GET /api/v1/capabilities", s.capabilities)
 	s.mux.HandleFunc("GET /api/v1/transfers", s.listTransfers)
+	s.mux.HandleFunc("POST /api/v1/metainfo/inspect", s.inspectMetainfo)
 	s.mux.HandleFunc("POST /api/v1/transfers", s.addTransfer)
 }
 
@@ -76,6 +79,27 @@ func (s *Server) capabilities(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) listTransfers(w http.ResponseWriter, _ *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"transfers": s.manager.List()})
+}
+
+func (s *Server) inspectMetainfo(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	const maxMetainfoBytes = 16 << 20
+	body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, maxMetainfoBytes))
+	if err != nil {
+		var maxErr *http.MaxBytesError
+		if errors.As(err, &maxErr) {
+			writeError(w, http.StatusRequestEntityTooLarge, "metainfo_too_large", "torrent metainfo exceeds the development inspection limit")
+			return
+		}
+		writeError(w, http.StatusBadRequest, "invalid_metainfo", "torrent metainfo could not be read")
+		return
+	}
+	meta, err := protocol.ParseTorrent(body)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_metainfo", err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, meta)
 }
 
 func (s *Server) addTransfer(w http.ResponseWriter, r *http.Request) {
