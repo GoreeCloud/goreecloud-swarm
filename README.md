@@ -6,18 +6,16 @@ GoreeCloud Swarm is the planned native GoreeCloud peer-to-peer transfer platform
 
 **Status: Development / pre-alpha.**
 
-The repository currently contains the first native service and metainfo-inspection foundation. It does **not** yet perform BitTorrent transfers. The service reports the transfer engine as unavailable until a real, validated engine adapter is connected.
+The repository currently contains the first native service foundation. It does **not** yet perform BitTorrent transfers. The service reports the transfer engine as unavailable until a real, validated engine adapter is connected.
 
 Implemented in this foundation:
 
 - Native GoreeCloud repository and service layout.
 - Authoritative service/core separation.
 - Replaceable transfer-engine interface.
+- Versioned isolated engine-sidecar client and handshake protocol.
 - Local-only HTTP API default (`127.0.0.1`).
 - `/api/v1/health` and `/api/v1/capabilities` endpoints.
-- Bounded native bencode decoding.
-- v1/v2/hybrid `.torrent` metainfo inspection at `/api/v1/metainfo/inspect`.
-- Raw `info` dictionary hashing for v1 and v2 identifiers.
 - Truthful degraded health while no transfer engine is attached.
 - Magnet URI parsing and validation.
 - Download-path sanitization primitives.
@@ -28,13 +26,13 @@ Implemented in this foundation:
 Not yet implemented:
 
 - Peer connections or piece transfer.
+- Production libtorrent-rasterbar sidecar implementation.
 - Trackers, DHT, PEX, LPD, or web seeds.
-- Starting transfers from inspected `.torrent` files.
 - Persistence/resume database.
 - Network Lock and proxy routing.
 - Authentication/authorization for remote management.
 - Web, desktop, mobile, or CLI clients beyond the initial `swarmd` service.
-- GoreeCloud Manager, Privacy Shield, Wardveil Security, Everkeep, Glaze UI, GoreeCloud Mesh, GoreeCloud Identity, or GoreeCloud Sync runtime integrations.
+- Privacy Shield, Wardveil, Everkeep, Mesh, Identity, Manager, or Glaze UI runtime integrations.
 
 Those capabilities remain planned until implementation evidence exists.
 
@@ -56,12 +54,6 @@ Check health:
 curl http://127.0.0.1:8080/api/v1/health
 ```
 
-Inspect a torrent without starting it:
-
-```bash
-curl --data-binary @example.torrent http://127.0.0.1:8080/api/v1/metainfo/inspect
-```
-
 ## Validate
 
 ```bash
@@ -71,13 +63,9 @@ go test ./...
 go build ./cmd/swarmd
 ```
 
-## Repository controls
-
-Repository-coupled specifications, feature state, roadmap, privacy, security, branding, and platform-contract records are maintained at the repository root. The canonical full product specification remains under `GoreeCloud/Projects` in Google Drive.
-
 ## Architecture
 
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/ENGINE-PROTOCOL.md`](docs/ENGINE-PROTOCOL.md), and [`docs/ENGINE-EVALUATION.md`](docs/ENGINE-EVALUATION.md).
 
 ## Repository origin and dependency policy
 
