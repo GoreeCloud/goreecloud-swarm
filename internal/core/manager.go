@@ -30,6 +30,14 @@ func (m *Manager) EngineCapabilities(ctx context.Context) engine.Capabilities {
 }
 
 func (m *Manager) AddMagnet(ctx context.Context, raw string) (Transfer, error) {
+	caps := m.engine.Capabilities(ctx)
+	if !caps.Ready {
+		return Transfer{}, engine.ErrUnavailable
+	}
+	if !caps.Supports(engine.CapabilityMagnet) {
+		return Transfer{}, engine.ErrUnsupported
+	}
+
 	magnet, err := protocol.ParseMagnet(raw)
 	if err != nil {
 		return Transfer{}, err
@@ -60,6 +68,63 @@ func (m *Manager) AddMagnet(ctx context.Context, raw string) (Transfer, error) {
 	m.transfers[id] = transfer
 	m.mu.Unlock()
 	return transfer, nil
+}
+
+func (m *Manager) Get(id string) (Transfer, error) {
+	m.mu.RLock()
+	transfer, ok := m.transfers[id]
+	m.mu.RUnlock()
+	if !ok {
+		return Transfer{}, ErrTransferNotFound
+	}
+	return transfer, nil
+}
+
+func (m *Manager) Pause(ctx context.Context, id string) (Transfer, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	transfer, ok := m.transfers[id]
+	if !ok {
+		return Transfer{}, ErrTransferNotFound
+	}
+	if err := m.engine.Pause(ctx, id); err != nil {
+		return transfer, err
+	}
+	transfer.State = StatePaused
+	transfer.LastError = ""
+	transfer.UpdatedAt = time.Now().UTC()
+	m.transfers[id] = transfer
+	return transfer, nil
+}
+
+func (m *Manager) Resume(ctx context.Context, id string) (Transfer, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	transfer, ok := m.transfers[id]
+	if !ok {
+		return Transfer{}, ErrTransferNotFound
+	}
+	if err := m.engine.Resume(ctx, id); err != nil {
+		return transfer, err
+	}
+	transfer.State = StatePending
+	transfer.LastError = ""
+	transfer.UpdatedAt = time.Now().UTC()
+	m.transfers[id] = transfer
+	return transfer, nil
+}
+
+func (m *Manager) Remove(ctx context.Context, id string, deleteData bool) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if _, ok := m.transfers[id]; !ok {
+		return ErrTransferNotFound
+	}
+	if err := m.engine.Remove(ctx, id, deleteData); err != nil {
+		return err
+	}
+	delete(m.transfers, id)
+	return nil
 }
 
 func (m *Manager) List() []Transfer {
