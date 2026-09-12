@@ -26,7 +26,7 @@ If an explicitly configured sidecar cannot start or complete its handshake, `swa
 
 ## Framing
 
-Messages are UTF-8 JSON objects separated by a newline. Each message is limited to 1 MiB by the client implementation.
+Messages are UTF-8 JSON objects separated by a newline. Each message is limited to 24 MiB by the client implementation. This accommodates the 16 MiB torrent-metainfo ingestion ceiling after JSON/base64 expansion while retaining a fixed IPC resource bound.
 
 Request:
 
@@ -84,12 +84,13 @@ Current client methods:
 
 - `hello`
 - `add`
+- `add_torrent`
 - `pause`
 - `resume`
 - `remove`
 - `shutdown`
 
-The protocol will be extended with explicit torrent-file ingestion, live transfer state, files, peers, trackers, pieces, network policy, and persistence/recovery operations as those behaviors are implemented.
+`add_torrent` carries the already Swarm-validated raw metainfo bytes through JSON byte encoding. The protocol will be extended with live transfer state, files, peers, trackers, pieces, network policy, and persistence/recovery operations as those behaviors are implemented.
 
 ## Authority and state
 
