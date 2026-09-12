@@ -22,7 +22,7 @@ func TestIsLoopbackAddress(t *testing.T) {
 }
 
 func TestOpenTransferEngineDefaultsUnavailable(t *testing.T) {
-	e, err := openTransferEngine(context.Background(), "")
+	e, err := openTransferEngine(context.Background(), "", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -33,7 +33,7 @@ func TestOpenTransferEngineDefaultsUnavailable(t *testing.T) {
 }
 
 func TestOpenTransferEngineRejectsRelativeExecutable(t *testing.T) {
-	_, err := openTransferEngine(context.Background(), "swarm-engine")
+	_, err := openTransferEngine(context.Background(), "swarm-engine", "")
 	if !errors.Is(err, engine.ErrProtocol) {
 		t.Fatalf("expected ErrProtocol, got %v", err)
 	}
