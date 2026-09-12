@@ -1,51 +1,37 @@
-# GoreeCloud Swarm — Security
+# Swarm Security
 
-## Current status
+## Status
 
-Swarm is development/pre-alpha software and is not production-ready.
+Development / pre-alpha. Swarm is not production-ready and no Stable security claim is made.
 
-## Security controls implemented in the foundation
+## Current enforced boundaries
 
-- The management service binds to loopback by default and refuses non-loopback addresses until authenticated remote management is implemented.
-- HTTP request bodies are bounded, including a 16 MiB development metainfo-inspection ceiling.
-- Unknown JSON transfer-request fields are rejected.
-- Responses include baseline `nosniff`, no-referrer, and no-store headers.
-- Magnet URIs and tracker schemes are validated before they reach an engine.
-- The native bencode decoder bounds total input size, nesting depth, byte-string length, and container entries; duplicate dictionary keys and non-canonical integers are rejected.
-- `.torrent` inspection validates essential v1/v2 structure before exposing metadata and computes hashes from the original raw `info` bytes.
-- Storage path helpers reject absolute paths and parent traversal outside the authorized download root.
-- A failed engine operation is not recorded as an accepted transfer.
-- The current engine placeholder performs no network transfer and truthfully reports itself unavailable.
+- `swarmd` refuses non-loopback HTTP binds while remote authentication is absent.
+- HTTP request bodies for transfer creation are bounded.
+- Unknown JSON fields are rejected for the current transfer-create request.
+- Security headers disable MIME sniffing, referrer disclosure, and response caching for API responses.
+- Magnet and tracker inputs are validated before reaching an engine.
+- Storage path helpers reject absolute paths and parent traversal outside the authorized root.
+- Failed engine add requests do not become authoritative transfer records.
+- No downloaded file is automatically executed because download execution does not exist yet.
+- A configured engine sidecar must use an absolute executable path, is launched without a shell or PATH lookup, does not inherit the `swarmd` environment, and must complete a bounded versioned handshake.
 
-## Security boundaries not yet implemented
+## Untrusted input model
 
-The current foundation does not provide:
+Future torrent metadata, peer messages, tracker responses, file paths, imported configuration, API calls, and integration events must all be treated as untrusted input. Parser and resource-exhaustion testing are release requirements, not optional hardening.
 
-- remote authentication or authorization;
-- TLS termination or externally reachable Web UI;
-- session/device management;
-- rate limiting or brute-force protection for remote access;
-- BitTorrent peer/tracker protocol processing;
-- metainfo fuzzing and broad real-world compatibility corpus validation;
-- engine process sandboxing;
-- persistent-state encryption or database hardening;
-- signed release/update verification;
-- Wardveil runtime acceptance or security evidence.
+## Remote management
 
-These gaps block production and Stable qualification.
+Remote administration is not implemented. Do not expose the current development API through a reverse proxy, public listener, port forward, or similar external path and represent it as a supported remote-management deployment.
 
 ## Secrets
 
-Do not commit passwords, API tokens, private keys, recovery codes, authentication cookies, or other reusable secrets. Local secret-bearing `.env` files are ignored; `.env.example` is intentionally sanitized.
-
-## Dependency security
-
-A future BitTorrent engine or other material dependency must have its provenance, version, license, security implications, update source, and architectural boundary documented before acceptance. Third-party code must remain subordinate to Swarm's native application and policy layers.
+Do not commit passwords, API tokens, private keys, recovery codes, authentication cookies, or other reusable secrets. `.env` and `.env.*` are ignored except sanitized example files.
 
 ## Vulnerability reporting
 
-Do not publish active exploit details, credentials, private user data, or other sensitive security information in a public issue. Use an authorized private GoreeCloud security-reporting channel. A dedicated public Swarm security-reporting address has not yet been established in this repository.
+Do not publish active credentials or sensitive exploit details in a public issue. Use an authorized private GoreeCloud security reporting channel. A dedicated public Swarm security-contact address has not yet been established in this repository.
 
-## Wardveil
+## Platform security state
 
-Wardveil integration is planned but not implemented. Repository labels, documentation, or UI must not claim Wardveil protection unless authoritative runtime evidence has actually been accepted.
+Wardveil Security integration is planned but not currently accepted at runtime. Ordinary Swarm checks or a green CI run must not be represented as a Wardveil verdict.
